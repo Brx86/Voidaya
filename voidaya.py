@@ -14,13 +14,13 @@
 import re, sys, time, json
 import asyncio, collections, websockets
 
+from config import *
 from pathlib import Path
 from loguru import logger
 from pkgutil import iter_modules
 from importlib import import_module
 from websockets.exceptions import ConnectionClosedError
 from websockets.legacy.client import WebSocketClientProtocol
-from config import WS_URL, NICKNAME, SUPER_USER, LOG, LOG_LEVEL
 
 # 使用pathlib获取当前路径
 PATH = Path(__file__).parent.absolute()
