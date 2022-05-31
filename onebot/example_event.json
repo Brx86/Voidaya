@@ -1,0 +1,26 @@
+{
+    "anonymous": null,
+    "font": 0,
+    "group_id": 859529818,
+    "message": "测试消息",
+    "message_id": -1753249190,
+    "message_seq": 1010882,
+    "message_type": "group",
+    "post_type": "message",
+    "raw_message": "测试消息",
+    "self_id": 1659870350,
+    "sender": {
+        "age": 0,
+        "area": "",
+        "card": "",
+        "level": "",
+        "nickname": "狐鸦aya~",
+        "role": "member",
+        "sex": "unknown",
+        "title": "",
+        "user_id": 1239504152
+    },
+    "sub_type": "normal",
+    "time": 1653319324,
+    "user_id": 1239504152
+}

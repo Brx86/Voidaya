@@ -1,0 +1,9 @@
+.env
+logs
+.history
+wstest
+__pycache__
+onebot/*
+noplugins
+config.py
+!onebot/example*
