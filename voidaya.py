@@ -67,6 +67,13 @@ class Method:
     def on_reg_match(self, pattern="") -> bool:
         return self.is_message() and re.search(pattern, self.raw)
 
+    def on_command(self, cmd, aliases=[]) -> bool:
+        if self.is_message():
+            ipt = self.raw.split("", 1)[0]
+            for c in [cmd, *aliases]:
+                if c == ipt:
+                    return True
+
     def only_to_me(self) -> bool:
         for nick in NICKNAME + [f"[CQ:at,qq={self.context['self_id']}]"]:
             if self.is_message() and nick in self.raw:
@@ -85,7 +92,10 @@ class Method:
         logger.info("发送调用 <- " + data)
         # 发送请求并等待返回
         await self.ws.send(data)
-        return await q.get()
+        try:
+            return await asyncio.wait_for(q.get(), timeout=10)
+        except asyncio.TimeoutError:
+            logger.warning(f"Echo {echo_num} 调用超时")
 
     async def send_msg(self, *message) -> int:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_msg-%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF
@@ -157,4 +167,7 @@ if __name__ == "__main__":
             time.sleep(10)
             continue
         except Exception as e:
-            logger.warning(repr(e))
+            logger.error(repr(e))
+            logger.warning(f"Retrying in 10 seconds...")
+            time.sleep(10)
+            continue
