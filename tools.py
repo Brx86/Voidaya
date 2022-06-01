@@ -1,3 +1,14 @@
+# -*- encoding: utf-8 -*-
+"""
+@File    :   tools.py
+@Time    :   2022/06/01 10:55:12
+@Author  :   Ayatale 
+@Version :   1.1
+@Contact :   ayatale@qq.com
+@Github  :   https://github.com/Brx86/Voidaya
+@Desc    :   常用的函数工具
+"""
+
 import asyncio
 from plugins import logger
 

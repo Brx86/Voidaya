@@ -1,3 +1,14 @@
+# -*- encoding: utf-8 -*-
+"""
+@File    :   __init__.py
+@Time    :   2022/06/01 10:55:59
+@Author  :   Ayatale 
+@Version :   1.1
+@Contact :   ayatale@qq.com
+@Github  :   https://github.com/Brx86/Voidaya
+@Desc    :   初始化日志与插件
+"""
+
 import sys, time
 from pathlib import Path
 from loguru import logger
