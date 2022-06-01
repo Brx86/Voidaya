@@ -6,7 +6,8 @@
 @Version :   1.1
 @Contact :   ayatale@qq.com
 @Github  :   https://github.com/Brx86/Voidaya
-@Desc    :   常用的函数工具（部分工具的使用需要安装如httpx等第三方库）
+@Desc    :   常用的函数工具
+@Warning :   部分工具的使用需要安装httpx等第三方库
 """
 
 import asyncio
@@ -51,7 +52,7 @@ async def aiorun(cmd, shell=True, timeout=20):
         stdout, stderr = await proc.communicate()
         logger.error(f"{cmd!r} killed after {timeout} seconds")
     if stdout:
-        return stdout.decode()
+        return stdout.decode().strip()
     if proc.returncode:
         logger.error(f"{cmd!r} exited with {proc.returncode}")
         if stderr:
@@ -59,7 +60,7 @@ async def aiorun(cmd, shell=True, timeout=20):
 
 
 async def silicon(text, lang="bash", rp=False):
-    async with open(f"/tmp/text", "w") as f:
+    with open(f"/tmp/text", "w") as f:
         text = text.replace("'", "’").replace('"', "’") if rp else text
         textlist = text.splitlines()
         text = text if len(textlist) < 100 else "\n".join(textlist[:100])
@@ -81,10 +82,7 @@ async def pastebin(text, api=0, lang="sh", timeout=10):
     logger.warning(f"Pastebin: {info}")
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
-            r = await client.post(
-                pastebin_api[0],
-                files={"c": BytesIO(text.encode())},
-            )
+            r = await client.post(pastebin_api[0], files={"c": BytesIO(text.encode())})
             if r.status_code == 200:
                 return f"{r.text.strip()}/{lang}" if api == 0 else r.text.strip()
             return f"请求出错，状态码 {r.status_code}"
