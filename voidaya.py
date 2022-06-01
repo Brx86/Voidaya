@@ -11,22 +11,13 @@
 """
 
 
-import re, sys, time, json
+import re, time, json
 import asyncio, collections, websockets
 
 from config import *
-from pathlib import Path
-from loguru import logger
-from pkgutil import iter_modules
-from importlib import import_module
+from plugins import logger, plugin_list
 from websockets.exceptions import ConnectionClosedError
 from websockets.legacy.client import WebSocketClientProtocol
-
-# 使用pathlib获取当前路径
-PATH = Path(__file__).parent.absolute()
-logger.remove()
-logger.add(sys.stderr, colorize=True, format=LOG, level=LOG_LEVEL)
-logger.add(PATH / "logs" / f"{time.strftime('%Y-%m-%d')}.log", enqueue=True)
 
 
 class Echo:
@@ -46,7 +37,7 @@ class Echo:
                 await obj[1].put(context)
 
 
-class Plugin:
+class Method:
     def __init__(self, ws: WebSocketClientProtocol, echo: Echo, context: dict):
         self.ws = ws
         self.echo = echo
@@ -66,12 +57,6 @@ class Plugin:
             if self.context["sender"].get("card")
             else self.context["sender"]["nickname"]
         )
-
-    def match(self) -> bool:
-        return self.on_full_match("hello")
-
-    async def handle(self):
-        await self.send_msg(text("hello world!"))
 
     def is_message(self) -> bool:
         return self.context["post_type"] in ["message", "message_sent"]
@@ -123,35 +108,10 @@ class Plugin:
             return ret["data"]["message_id"]
 
 
-def text(string: str) -> dict:
-    # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E7%BA%AF%E6%96%87%E6%9C%AC
-    return {"type": "text", "data": {"text": string}}
-
-
-def image(file: str, cache=True) -> dict:
-    # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E5%9B%BE%E7%89%87
-    return {"type": "image", "data": {"file": file, "cache": cache}}
-
-
-def record(file: str, cache=True) -> dict:
-    # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E8%AF%AD%E9%9F%B3
-    return {"type": "record", "data": {"file": file, "cache": cache}}
-
-
-def at(qq: int) -> dict:
-    # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E6%9F%90%E4%BA%BA
-    return {"type": "at", "data": {"qq": qq}}
-
-
-def music(data: str) -> dict:
-    # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E9%9F%B3%E4%B9%90%E5%88%86%E4%BA%AB-
-    return {"type": "music", "data": {"type": "qq", "id": data}}
-
-
 async def plugin_pool(ws: WebSocketClientProtocol, context: dict):
     # 遍历插件列表，执行匹配
     for plugin in plugin_list:
-        p = plugin.PatchPlugin(ws, echo, context)
+        p = plugin.Plugin(ws, echo, context)
         if p.match():
             await p.handle()
 
@@ -171,25 +131,17 @@ async def on_message(ws: WebSocketClientProtocol, message: str):
         await plugin_pool(ws, context)
 
 
-async def ws_client(WS_URL: str):
+async def ws_client(ws_server: str):
     # 建立 WebSocket 连接
-    async with websockets.connect(WS_URL) as ws:
+    async with websockets.connect(ws_server) as ws:
         if "meta_event_type" in json.loads(await ws.recv()):
-            logger.info(f"Connected to {WS_URL}")
+            logger.info(f"Connected to {ws_server}")
         async for message in ws:
             asyncio.create_task(on_message(ws, message))
 
 
-def load_plugins():
-    # 加载插件
-    for _, plugin_file, _ in iter_modules(["plugins"]):
-        logger.info(f"Loading plugin: {plugin_file}")
-        yield import_module(f"plugins.{plugin_file}")
-
-
 if __name__ == "__main__":
     echo = Echo()
-    plugin_list = list(load_plugins())
     while True:
         try:
             asyncio.run(ws_client(WS_URL))
@@ -202,7 +154,7 @@ if __name__ == "__main__":
             continue
         except ConnectionRefusedError:
             logger.warning(f"{WS_URL} refused connection, retrying in 10 seconds...")
-            time.sleep(5)
+            time.sleep(10)
             continue
         except Exception as e:
             logger.warning(repr(e))
