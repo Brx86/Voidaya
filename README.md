@@ -1,5 +1,5 @@
 # Voidaya
-受[VoidBot](https://github.com/FloatTech/voidbot/)启发改写的异步版本，插件部分单独放在文件夹中。
+受[VoidBot](https://github.com/FloatTech/voidbot/)启发改写的异步版本，插件可独立放在文件夹中。
 
 
 >- 关于VoidBot: 一个支持 OneBot 标准的 能跑就行 Python SDK 
