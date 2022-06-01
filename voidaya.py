@@ -69,7 +69,7 @@ class Method:
 
     def on_command(self, cmd, aliases=[]) -> bool:
         if self.is_message():
-            ipt = self.raw.split("", 1)[0]
+            ipt = self.raw.split(" ", 1)[0]
             for c in [cmd, *aliases]:
                 if c == ipt:
                     return True
