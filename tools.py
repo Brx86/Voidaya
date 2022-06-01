@@ -6,7 +6,7 @@
 @Version :   1.1
 @Contact :   ayatale@qq.com
 @Github  :   https://github.com/Brx86/Voidaya
-@Desc    :   常用的函数工具
+@Desc    :   常用的函数工具（部分工具的使用需要安装如httpx等第三方库）
 """
 
 import asyncio
