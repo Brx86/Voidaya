@@ -82,8 +82,8 @@ async def get_pkgbuild(pkgname):
 
 
 class Plugin(Method):
-    def match(self):  # 说 hello 则回复
-        return self.on_command("/arch", aliases=["/pacman"])
+    def match(self):  # 检测命令/arch, /pacman
+        return self.on_command(["/arch", "/pacman"])
 
     async def handle(self):
         if len(self.args) < 2:

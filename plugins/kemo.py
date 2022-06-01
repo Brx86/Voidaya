@@ -4,8 +4,8 @@ from random import randint
 
 
 class Plugin(Method):
-    def match(self):  # 说 hello 则回复
-        return self.on_command("/kemo", aliases=["/k", "/kk"])
+    def match(self):  # 检测命令/kemo, /k, /kk
+        return self.on_command(["/kemo", "/k", "/kk"])
 
     async def handle(self):
         if len(self.args) == 2 and self.args[1].isdigit():
