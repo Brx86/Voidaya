@@ -61,17 +61,17 @@ class Method:
     def is_message(self) -> bool:
         return self.context["post_type"] in ["message", "message_sent"]
 
-    def on_full_match(self, keyword="") -> bool:
+    def on_full_match(self, keyword: str = "") -> bool:
         return self.is_message() and self.raw == keyword
 
-    def on_reg_match(self, pattern="") -> bool:
+    def on_reg_match(self, pattern: str = "") -> bool:
         return self.is_message() and re.search(pattern, self.raw)
 
-    def on_command(self, cmd, aliases=[]) -> bool:
+    def on_command(self, commands: list = []) -> bool:
         if self.is_message():
-            ipt = self.raw.split(" ", 1)[0]
-            for c in [cmd, *aliases]:
-                if c == ipt:
+            msg_cmd = self.raw.split(" ", 1)[0]
+            for cmd in commands:
+                if cmd == msg_cmd:
                     return True
 
     def only_to_me(self) -> bool:
