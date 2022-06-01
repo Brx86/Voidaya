@@ -16,7 +16,7 @@
 4. 以 `example_config.py` 为模板，在 `config.py` 文件中编写你的配置
 5. 使用 `Python` 直接运行 `voidbot.py` 文件
 
-你的插件通过基类 **Plugin** 的一个子类来实现。你只需要在plugins文件夹下写一个文件，继承 **Plugin** 的子类并重写 **match** 和 **handle** 方法就能快速实现插件功能
+你的插件通过基类 **Method** 的一个子类来实现。你只需要在plugins文件夹下创建一个文件，继承 **Method** 的子类并重写 **match** 和 **handle** 方法就能快速实现插件功能
 
 
 ## 说明
@@ -46,6 +46,7 @@
 | ------------- | ------------------ |
 | on_full_match | 完全匹配消息       |
 | on_reg_match  | 正则匹配消息       |
+| on_command    | 匹配开头命令       |
 | only_to_me    | 被艾特或者被喊名字 |
 | super_user    | 发送者为主人       |
 | admin_user    | 发送者为群管理     |
