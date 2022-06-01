@@ -2,6 +2,7 @@
 logs
 .history
 wstest
+testserver.py
 __pycache__
 onebot/*
 noplugins
