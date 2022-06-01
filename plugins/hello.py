@@ -1,4 +1,3 @@
-from . import logger
 from tools import Message
 from voidaya import Method
 
