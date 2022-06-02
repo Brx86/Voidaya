@@ -12,38 +12,41 @@
 
 import asyncio
 from plugins import logger
+from typing import Union, Optional
 
 
 class Message:
     # 定义消息类型
+    @staticmethod
     def text(string: str) -> dict:
         # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E7%BA%AF%E6%96%87%E6%9C%AC
         return {"type": "text", "data": {"text": string}}
 
-    def image(file: str, cache=True) -> dict:
+    @staticmethod
+    def image(file: str, cache: bool = True) -> dict:
         # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E5%9B%BE%E7%89%87
         return {"type": "image", "data": {"file": file, "cache": cache}}
 
-    def record(file: str, cache=True) -> dict:
+    @staticmethod
+    def record(file: str, cache: bool = True) -> dict:
         # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E8%AF%AD%E9%9F%B3
         return {"type": "record", "data": {"file": file, "cache": cache}}
 
+    @staticmethod
     def at(qq: int) -> dict:
         # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E6%9F%90%E4%BA%BA
         return {"type": "at", "data": {"qq": qq}}
 
+    @staticmethod
     def music(data: str) -> dict:
         # https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#%E9%9F%B3%E4%B9%90%E5%88%86%E4%BA%AB-
         return {"type": "music", "data": {"type": "qq", "id": data}}
 
 
-async def aiorun(cmd, shell=True, timeout=20):
+async def aiorun(cmd: str, timeout: int = 20) -> Union[str, bool]:
     from asyncio.subprocess import PIPE
 
-    if shell is True:
-        proc = await asyncio.create_subprocess_shell(cmd, stdout=PIPE, stderr=PIPE)
-    else:
-        proc = await asyncio.create_subprocess_exec(*cmd, stdout=PIPE, stderr=PIPE)
+    proc = await asyncio.create_subprocess_shell(cmd, stdout=PIPE, stderr=PIPE)
     logger.warning(f"Command: {cmd}")
     try:
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
@@ -53,24 +56,27 @@ async def aiorun(cmd, shell=True, timeout=20):
         logger.error(f"{cmd!r} killed after {timeout} seconds")
     if stdout:
         return stdout.decode().strip()
-    if proc.returncode:
-        logger.error(f"{cmd!r} exited with {proc.returncode}")
-        if stderr:
-            logger.warning(f"[stderr]:\n{stderr.decode()}")
+    if proc.returncode == 0:
+        return True
+    logger.error(f"{cmd!r} exited with {proc.returncode}")
+    if stderr:
+        logger.warning(f"[stderr]:\n{stderr.decode()}")
+    return False
 
 
-async def silicon(text, lang="bash", rp=False):
+async def silicon(text: str, lang: str = "bash", rp: bool = False) -> Optional[str]:
     with open(f"/tmp/text", "w") as f:
         text = text.replace("'", "’").replace('"', "’") if rp else text
         textlist = text.splitlines()
         text = text if len(textlist) < 100 else "\n".join(textlist[:100])
         f.write(text + "......")
     cmd = f"silicon /tmp/text -o/tmp/text.png -l{lang} -fLXGWWenKaiMono -b#000000 --no-window-controls"
-    await aiorun(cmd)
-    return "file:///tmp/text.png"
+    if await aiorun(cmd):
+        return "file:///tmp/text.png"
+    return None
 
 
-async def pastebin(text, api=0, lang="sh", timeout=10):
+async def pastebin(text: str, api: int = 0, lang: str = "sh", timeout: int = 10) -> str:
     import httpx
     from io import BytesIO
 

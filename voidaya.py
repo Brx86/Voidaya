@@ -16,6 +16,7 @@ import asyncio, collections, websockets
 
 from config import *
 from plugins import logger, plugin_list
+from typing import Any, List, Optional, Tuple
 from websockets.exceptions import ConnectionClosedError
 from websockets.legacy.client import WebSocketClientProtocol
 
@@ -25,9 +26,9 @@ class Echo:
         self.echo_num = 0
         self.echo_list = collections.deque(maxlen=20)
 
-    def get(self):
+    def get(self) -> Tuple[int, asyncio.Queue[Any]]:
         self.echo_num += 1
-        q = asyncio.Queue(maxsize=1)
+        q: asyncio.Queue = asyncio.Queue(maxsize=1)
         self.echo_list.append((self.echo_num, q))
         return self.echo_num, q
 
@@ -65,20 +66,22 @@ class Method:
         return self.is_message() and self.raw == keyword
 
     def on_reg_match(self, pattern: str = "") -> bool:
-        return self.is_message() and re.search(pattern, self.raw)
+        return self.is_message() and bool(re.search(pattern, self.raw))
 
-    def on_command(self, commands: list = []) -> bool:
+    def on_command(self, commands: List[str]) -> bool:
         if self.is_message():
             msg_cmd = self.raw.split(" ", 1)[0]
             for cmd in commands:
                 if cmd == msg_cmd:
                     return True
+        return False
 
     def only_to_me(self) -> bool:
         for nick in NICKNAME + [f"[CQ:at,qq={self.context['self_id']}]"]:
             if self.is_message() and nick in self.raw:
                 self.raw = self.raw.replace(nick, "")
                 return True
+        return False
 
     def super_user(self) -> bool:
         return self.uid in SUPER_USER
@@ -86,7 +89,7 @@ class Method:
     def admin_user(self) -> bool:
         return self.super_user() or self.role in ("admin", "owner")
 
-    async def call_api(self, action: str, params: dict) -> dict:
+    async def call_api(self, action: str, params: dict) -> Optional[dict]:
         echo_num, q = self.echo.get()
         data = json.dumps({"action": action, "params": params, "echo": echo_num})
         logger.info("发送调用 <- " + data)
@@ -96,26 +99,29 @@ class Method:
             return await asyncio.wait_for(q.get(), timeout=10)
         except asyncio.TimeoutError:
             logger.warning(f"Echo {echo_num} 调用超时")
+            return None
 
-    async def send_msg(self, *message) -> int:
+    async def send_msg(self, *message) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_msg-%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF
         if self.gid:
             return await self.send_group_msg(*message)
         return await self.send_private_msg(*message)
 
-    async def send_private_msg(self, *message) -> int:
+    async def send_private_msg(self, *message) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_private_msg-%E5%8F%91%E9%80%81%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF
         params = {"user_id": self.uid, "message": message}
         ret = await self.call_api("send_private_msg", params)
         if ret and ret.get("status") == "ok":
             return ret["data"]["message_id"]
+        return None
 
-    async def send_group_msg(self, *message) -> int:
+    async def send_group_msg(self, *message) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_group_msg-%E5%8F%91%E9%80%81%E7%BE%A4%E6%B6%88%E6%81%AF
         params = {"group_id": self.context["group_id"], "message": message}
         ret = await self.call_api("send_group_msg", params)
         if ret and ret.get("status") == "ok":
             return ret["data"]["message_id"]
+        return None
 
 
 async def plugin_pool(ws: WebSocketClientProtocol, context: dict):
