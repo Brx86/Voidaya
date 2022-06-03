@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-@File    :   arch.py
+@File    :   manjaro.py
 @Time    :   2022/06/01 20:09:29
 @Author  :   Ayatale 
 @Version :   1.1
