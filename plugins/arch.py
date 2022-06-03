@@ -3,7 +3,7 @@
 @File    :   arch.py
 @Time    :   2022/06/01 20:09:29
 @Author  :   Ayatale 
-@Version :   1.1
+@Version :   1.2
 @Contact :   ayatale@qq.com
 @Github  :   https://github.com/Brx86/Voidaya
 @Desc    :   调用paru查询arch包信息
@@ -88,7 +88,7 @@ class Plugin(Method):
     async def handle(self):
         if len(self.args) < 2:
             return await self.send_msg(
-                "注意：\n此插件可用于查询包名的详细信息\n用法:\n #arch <包名> 查询全部仓库\n #arch -a <包名> 仅查询aur\n #arch -Ss <包名> 模糊查询包名\n #arch -d/da <包名> 显示依赖\n #arch -Fl <包名> 显示包的文件内容\n #arch -L <包组名> 显示包组内容\n #arch -D <包名> 显示下载地址\n #arch -P <包名> 显示PKGBUILD\n #arch -Sy pacman -Sy\n #arch -Syy pacman -Syy"
+                "注意: \n此插件可用于查询包名的详细信息\n用法:\n #arch <包名> 查询全部仓库\n #arch -a <包名> 仅查询aur\n #arch -Ss <包名> 模糊查询包名\n #arch -d/da <包名> 显示依赖\n #arch -Fl <包名> 显示包的文件内容\n #arch -F <文件> 查询某一文件所在包\n #arch -L <包组名> 显示包组内容\n #arch -D <包名> 显示下载地址\n #arch -P <包名> 显示PKGBUILD\n #arch -Sy pacman -Sy\n #arch -Syy pacman -Syy"
             )
         match self.args[1]:
             case "-a":
@@ -109,6 +109,10 @@ class Plugin(Method):
                 pkg = safename(self.args[2])
                 result = await aiorun(f"pkgfile -l {pkg}")
                 msg = await pastebin(result) if result else "请输入正确的包名"
+            case "-F":
+                pkg = safename(self.args[2])
+                result = await aiorun(f"pkgfile {pkg}")
+                msg = result if result else "未找到此文件"
             case "-P":
                 pkg = safename(self.args[2])
                 msg = await get_pkgbuild(pkg)
