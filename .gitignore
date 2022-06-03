@@ -7,4 +7,5 @@ __pycache__
 onebot/*
 noplugins
 config.py
+*.zst
 !onebot/example*
