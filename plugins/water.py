@@ -10,7 +10,7 @@
 """
 
 
-import os, re, json, time, aiofiles
+import os, re, json, time
 from . import PATH, logger
 from tools import Message
 from voidaya import Method
@@ -18,8 +18,8 @@ from collections import Counter
 
 
 class Plugin(Method):
-    def match(self):  # 说 hello 则回复
-        return self.on_full_match("/💦")
+    def match(self):  # 检测命令 #💦
+        return self.on_command(["#💦"])
 
     async def update(self, gid):
         data = await self.call_api("get_group_member_list", {"group_id": gid})
@@ -27,7 +27,7 @@ class Plugin(Method):
             user_dict = {}
             for u in data["data"]:
                 user_dict[u["user_id"]] = u["card"] if u["card"] else u["nickname"]
-            async with aiofiles.open(PATH / "src" / f"{gid}.json", "w") as f:
+            with open(PATH / "src" / f"{gid}.json", "w") as f:
                 json.dump(user_dict, f)
             logger.success(f"{gid} get_group_member_list success!")
         else:
@@ -37,8 +37,11 @@ class Plugin(Method):
     async def count_msg(self, gid):
         start_time = time.time()
         logpath = f"/home/aya/git/ayabot2/logs/{time.strftime('%Y-%m-%d')}.log"
+        if not os.path.exists(logpath):
+            with open(logpath, "a") as f:
+                f.write("")
         group_data = PATH / "src" / f"{gid}.json"
-        logger.info(f"Log path: {logpath} group_data: {group_data}")
+        logger.info(f"Log path: {logpath}")
         logger.info(f"Group data: {group_data}")
         if not os.path.exists(group_data):
             await self.update(gid)
@@ -68,7 +71,10 @@ class Plugin(Method):
     async def handle(self):
         if len(self.args) > 1:
             if self.args[1] == "test":
-                return await self.count_msg(1136462265)
+                msg = await self.count_msg(1136462265)
             elif self.args[1].isdigit():
                 await self.update(self.args[1])
-        return await self.count_msg(self.gid)
+                msg = await self.count_msg(self.args[1])
+        else:
+            msg = await self.count_msg(self.gid)
+        return await self.send_msg(msg)
