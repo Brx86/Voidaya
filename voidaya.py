@@ -101,13 +101,15 @@ class Method:
             logger.warning(f"Echo {echo_num} 调用超时")
             return None
 
-    async def send_msg(self, *message) -> Optional[int]:
+    async def send_msg(self, *message: Tuple[str | dict]) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_msg-%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF
+        if isinstance(message[0], str):
+            message = [{"type": "text", "data": {"text": message[0]}}]
         if self.gid:
             return await self.send_group_msg(*message)
         return await self.send_private_msg(*message)
 
-    async def send_private_msg(self, *message) -> Optional[int]:
+    async def send_private_msg(self, *message: Tuple[str | dict]) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_private_msg-%E5%8F%91%E9%80%81%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF
         params = {"user_id": self.uid, "message": message}
         ret = await self.call_api("send_private_msg", params)
@@ -115,7 +117,7 @@ class Method:
             return ret["data"]["message_id"]
         return None
 
-    async def send_group_msg(self, *message) -> Optional[int]:
+    async def send_group_msg(self, *message: Tuple[str | dict]) -> Optional[int]:
         # https://github.com/botuniverse/onebot-11/blob/master/api/public.md#send_group_msg-%E5%8F%91%E9%80%81%E7%BE%A4%E6%B6%88%E6%81%AF
         params = {"group_id": self.context["group_id"], "message": message}
         ret = await self.call_api("send_group_msg", params)
