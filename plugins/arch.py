@@ -50,7 +50,7 @@ async def search(pkg, aur=False, dep=False):
     pkg = safename(pkg)
     cmd = f"paru -Sai {pkg}" if aur else f"paru -Si {pkg}"
     result = await aiorun(cmd)
-    if result is None:
+    if not result:
         return
     logger.warning(result)
     dic = desc_dep if dep else desc
