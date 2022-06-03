@@ -7,7 +7,7 @@
 @Contact :   ayatale@qq.com
 @Github  :   https://github.com/Brx86/Voidaya
 @Desc    :   使用指定了配置路径的pacman查询manjaro包信息
-@Warning :   用到了Match-Case, 所以仅支持python3.10及以上版本
+@Warning :   只支持-Si, 不支持模糊查询
 """
 
 
