@@ -1,3 +1,15 @@
+# -*- encoding: utf-8 -*-
+"""
+@File    :   kemo.py
+@Time    :   2022/06/03 21:30:40
+@Author  :   Ayatale 
+@Version :   1.0
+@Contact :   ayatale@qq.com
+@Github  :   https://github.com/Brx86/Voidaya
+@Desc    :   随机兽耳酱
+"""
+
+
 from tools import Message
 from voidaya import Method
 from random import randint
@@ -16,8 +28,8 @@ class Plugin(Method):
                 n = 5
         else:
             n = 1
-        kemo_list = []
+        msg_list = []
         base_url = "https://ayatale.coding.net/p/picbed/d/kemo/git/raw/master"
         for _ in range(n):
-            kemo_list.append(Message.image(f"{base_url}/{randint(1,696)}.jpg"))
-        await self.send_msg(*kemo_list)
+            msg_list.append(Message.image(f"{base_url}/{randint(1,696)}.jpg"))
+        return await self.send_msg(*msg_list)
