@@ -12,13 +12,13 @@
 
 
 import re, time, json
-import asyncio, collections, websockets
+import asyncio, collections
 
 from config import *
 from plugins import logger, plugin_list
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 from websockets.exceptions import ConnectionClosedError
-from websockets.legacy.client import WebSocketClientProtocol
+from websockets.legacy.client import connect, WebSocketClientProtocol
 
 
 class Echo:
@@ -134,9 +134,9 @@ async def plugin_pool(ws: WebSocketClientProtocol, context: dict):
             await p.handle()
 
 
-async def on_message(ws: WebSocketClientProtocol, message: str):
+async def on_message(ws: WebSocketClientProtocol, message: Union[str, bytes]):
     # https://github.com/botuniverse/onebot-11/blob/master/event/README.md
-    context = json.loads(message := message.strip())
+    context = json.loads(message := str(message).strip())
     if context.get("echo"):
         logger.success(f"调用返回 -> {message}")
         # 响应报文通过队列传递给调用 API 的函数
@@ -151,7 +151,7 @@ async def on_message(ws: WebSocketClientProtocol, message: str):
 
 async def ws_client(ws_server: str):
     # 建立 WebSocket 连接
-    async with websockets.connect(ws_server) as ws:
+    async with connect(ws_server) as ws:
         if "meta_event_type" in json.loads(await ws.recv()):
             logger.info(f"Connected to {ws_server}")
         async for message in ws:
