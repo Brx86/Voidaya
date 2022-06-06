@@ -1,6 +1,7 @@
 .env
 logs
 .history
+.mypy_cache
 wstest
 testserver.py
 __pycache__
