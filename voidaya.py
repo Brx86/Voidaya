@@ -12,19 +12,20 @@
 
 
 import re, time, json
-import asyncio, collections
+import asyncio
 
 from config import *
+from collections import deque
 from plugins import logger, plugin_list
 from typing import Any, List, Optional, Tuple, Union
 from websockets.exceptions import ConnectionClosedError
-from websockets.legacy.client import connect, WebSocketClientProtocol
+from websockets.legacy.client import connect, WebSocketClientProtocol as WSClient
 
 
 class Echo:
     def __init__(self):
         self.echo_num = 0
-        self.echo_list = collections.deque(maxlen=20)
+        self.echo_list = deque(maxlen=20)
 
     def get(self) -> Tuple[int, asyncio.Queue[Any]]:
         self.echo_num += 1
@@ -38,9 +39,29 @@ class Echo:
                 await obj[1].put(context)
 
 
+class Database:
+    def __init__(self):
+        self.data = {}
+        self.repeat = deque(maxlen=20)
+
+    def get(self, key) -> Optional[Any]:
+        return self.data.get(key)
+
+    def update(self, key: str, value: Union[str, deque]):
+        self.data[key] = value
+        logger.info(f"DB: {key}=>{value}")
+
+    def check(self, keyword: str) -> bool:
+        if keyword in self.repeat:
+            return True
+        self.repeat.append(keyword)
+        return False
+
+
 class Method:
-    def __init__(self, ws: WebSocketClientProtocol, echo: Echo, context: dict):
+    def __init__(self, ws: WSClient, db: Database, echo: Echo, context: dict):
         self.ws = ws
+        self.db = db
         self.echo = echo
         self.context = context
         self.raw = context["raw_message"]
@@ -126,15 +147,15 @@ class Method:
         return None
 
 
-async def plugin_pool(ws: WebSocketClientProtocol, context: dict):
+async def plugin_pool(ws: WSClient, context: dict):
     # 遍历插件列表，执行匹配
     for plugin in plugin_list:
-        p = plugin.Plugin(ws, echo, context)
+        p = plugin.Plugin(ws, db, echo, context)
         if p.match():
             await p.handle()
 
 
-async def on_message(ws: WebSocketClientProtocol, message: Union[str, bytes]):
+async def on_message(ws: WSClient, message: Union[str, bytes]):
     # https://github.com/botuniverse/onebot-11/blob/master/event/README.md
     context = json.loads(message := str(message).strip())
     if context.get("echo"):
@@ -160,6 +181,7 @@ async def ws_client(ws_server: str):
 
 if __name__ == "__main__":
     echo = Echo()
+    db = Database()
     while True:
         try:
             asyncio.run(ws_client(WS_URL))
