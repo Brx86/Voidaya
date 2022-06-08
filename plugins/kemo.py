@@ -10,6 +10,7 @@
 """
 
 
+from . import logger
 from tools import Message
 from voidaya import Method
 from random import randint
@@ -31,5 +32,7 @@ class Plugin(Method):
         msg_list = []
         base_url = "https://ayatale.coding.net/p/picbed/d/kemo/git/raw/master"
         for _ in range(n):
-            msg_list.append(Message.image(f"{base_url}/{randint(1,696)}.jpg"))
+            while self.db.check(picname := f"{randint(1, 696)}.jpg"):
+                logger.info(f"{picname} is already in list.")
+            msg_list.append(Message.image(f"{base_url}/{picname}"))
         return await self.send_msg(*msg_list)

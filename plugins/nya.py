@@ -11,6 +11,7 @@
 
 
 import os
+from . import logger
 from tools import Message
 from voidaya import Method
 from random import choice
@@ -34,5 +35,7 @@ class Plugin(Method):
             n = 1
         msg_list = []
         for _ in range(n):
-            msg_list.append(Message.image(f"file://{nya_path}/{choice(nya_list)}"))
+            while self.db.check(picname := f"{choice(nya_list)}"):
+                logger.info(f"{picname} is already in list.")
+            msg_list.append(Message.image(f"file://{nya_path}/{picname}"))
         await self.send_msg(*msg_list)
