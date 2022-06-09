@@ -42,6 +42,7 @@ class Echo:
 class Database:
     def __init__(self):
         self.data = {}
+        self.limit = {}
         self.repeat = deque(maxlen=20)
 
     def get(self, key) -> Optional[Any]:
@@ -51,7 +52,19 @@ class Database:
         self.data[key] = value
         logger.info(f"DB: {key}=>{value}")
 
-    def check(self, keyword: str) -> bool:
+    def check_limit(self, name: str, maxlen: int = 5, limit_time: int = 30) -> bool:
+        now_time = time.time()
+        if self.limit.get(name) is None:
+            self.limit[name] = deque(maxlen=maxlen)
+        elif (
+            len(self.limit[name]) >= maxlen
+            and now_time - self.limit[name][0] < limit_time
+        ):
+            return False
+        self.limit[name].append(now_time)
+        return True
+
+    def check_repeat(self, keyword: str) -> bool:
         if keyword in self.repeat:
             return True
         self.repeat.append(keyword)
@@ -79,6 +92,9 @@ class Method:
             if self.context["sender"].get("card")
             else self.context["sender"]["nickname"]
         )
+
+    def limited(self, maxlen: int, limit_time: int) -> bool:
+        return self.db.check_limit(f"msg:{self.gid}:{self.uid}", maxlen, limit_time)
 
     def is_message(self) -> bool:
         return self.context["post_type"] in ["message", "message_sent"]

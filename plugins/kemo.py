@@ -15,6 +15,8 @@ from tools import Message
 from voidaya import Method
 from random import randint
 
+base_url = "https://ayatale.coding.net/p/picbed/d/kemo/git/raw/master"
+
 
 class Plugin(Method):
     def match(self):  # 检测命令/kemo, /k, /kk
@@ -30,9 +32,14 @@ class Plugin(Method):
         else:
             n = 1
         msg_list = []
-        base_url = "https://ayatale.coding.net/p/picbed/d/kemo/git/raw/master"
         for _ in range(n):
-            while self.db.check(picname := f"{randint(1, 696)}.jpg"):
+            while self.db.check_repeat(picname := f"{randint(1, 696)}.jpg"):
                 logger.info(f"{picname} is already in list.")
-            msg_list.append(Message.image(f"{base_url}/{picname}"))
-        return await self.send_msg(*msg_list)
+            if self.db.check_limit(name := f"kemo:{self.gid}:{self.uid}"):
+                msg_list.append(Message.image(f"{base_url}/{picname}"))
+            else:
+                logger.warning(f"[{name}] has reached the limit.")
+                break
+        if msg_list:
+            return await self.send_msg(*msg_list)
+        return await self.send_msg("你的访问太频繁了，休息一下吧")
