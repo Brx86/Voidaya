@@ -129,7 +129,7 @@ class Method:
     async def call_api(self, action: str, params: dict) -> Optional[dict]:
         echo_num, q = self.echo.get()
         data = json.dumps({"action": action, "params": params, "echo": echo_num})
-        logger.info("发送调用 <- " + data)
+        logger.info(f"发送调用 <- {action}: {echo_num}")
         # 发送请求并等待返回
         await self.ws.send(data)
         try:
@@ -168,20 +168,21 @@ async def plugin_pool(ws: WSClient, context: dict):
     for plugin in plugin_list:
         p = plugin.Plugin(ws, db, echo, context)
         if p.match():
+            logger.info(f"匹配命令 -> {context.get('raw_message')}")
             await p.handle()
 
 
 async def on_message(ws: WSClient, message: Union[str, bytes]):
     # https://github.com/botuniverse/onebot-11/blob/master/event/README.md
     context = json.loads(message := str(message).strip())
-    if context.get("echo"):
-        logger.success(f"调用返回 -> {message}")
+    if e := context.get("echo"):
+        logger.success(f"调用返回 -> {e}")
         # 响应报文通过队列传递给调用 API 的函数
         await echo.match(context)
     elif context.get("meta_event_type"):
-        logger.success(f"心跳事件 -> {message}")
+        logger.success(f"心跳事件 -> {context.get('self_id')}")
     else:
-        logger.info(f"收到事件 -> {message}")
+        logger.info(f"收到事件 -> {context.get('message_type')}:{context.get('post_type')}")
         # 消息事件，检测插件
         await plugin_pool(ws, context)
 
