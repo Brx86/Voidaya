@@ -87,11 +87,7 @@ class Method:
             "%Y-%m-%d %H.%M.%S",
             time.localtime(self.context["time"]),
         )
-        self.name = (
-            self.context["sender"]["card"]
-            if self.context["sender"].get("card")
-            else self.context["sender"]["nickname"]
-        )
+        self.name = context["sender"].get("card") or context["sender"]["nickname"]
 
     def limited(self, maxlen: int, limit_time: int) -> bool:
         return self.db.check_limit(f"msg:{self.gid}:{self.uid}", maxlen, limit_time)
