@@ -3,7 +3,7 @@ logs
 .history
 .mypy_cache
 wstest
-testserver.py
+test*
 __pycache__
 onebot/*
 noplugins
