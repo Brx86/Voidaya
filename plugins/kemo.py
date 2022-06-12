@@ -33,7 +33,7 @@ class Plugin(Method):
             n = 1
         msg_list = []
         for _ in range(n):
-            while self.db.check_repeat(picname := f"{randint(1, 696)}.jpg"):
+            while self.db.check_times(picname := f"{randint(1, 696)}.jpg"):
                 logger.info(f"{picname} is already in list.")
             if self.db.check_limit(name := f"kemo:{self.gid}:{self.uid}"):
                 msg_list.append(Message.image(f"{base_url}/{picname}"))

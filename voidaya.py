@@ -43,7 +43,7 @@ class Database:
     def __init__(self):
         self.data = {}
         self.limit = {}
-        self.repeat = deque(maxlen=20)
+        self.times = deque(maxlen=20)
 
     def get(self, key) -> Optional[Any]:
         return self.data.get(key)
@@ -64,10 +64,10 @@ class Database:
         self.limit[name].append(now_time)
         return True
 
-    def check_repeat(self, keyword: str) -> bool:
-        if keyword in self.repeat:
+    def check_times(self, keyword: str) -> bool:
+        if keyword in self.times:
             return True
-        self.repeat.append(keyword)
+        self.times.append(keyword)
         return False
 
 

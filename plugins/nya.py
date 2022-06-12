@@ -35,7 +35,7 @@ class Plugin(Method):
             n = 1
         msg_list = []
         for _ in range(n):
-            while self.db.check_repeat(picname := f"{choice(nya_list)}"):
+            while self.db.check_times(picname := f"{choice(nya_list)}"):
                 logger.info(f"{picname} is already in list.")
             if self.db.check_limit(name := f"nya:{self.gid}:{self.uid}"):
                 msg_list.append(Message.image(f"file:///{nya_path}/{picname}"))
