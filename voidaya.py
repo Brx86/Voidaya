@@ -48,9 +48,10 @@ class Database:
     def get(self, key) -> Optional[Any]:
         return self.data.get(key)
 
-    def update(self, key: str, value: Union[str, deque]):
+    def update(self, key: str, value: Union[int, str], log=True):
         self.data[key] = value
-        logger.info(f"DB: {key}=>{value}")
+        if log is True:
+            logger.info(f"DB: {key}=>{value}")
 
     def check_limit(self, name: str, maxlen: int = 5, limit_time: int = 30) -> bool:
         now_time = time.time()
@@ -84,7 +85,7 @@ class Method:
         self.role = context["sender"].get("role")
         self.args = str.split(self.raw)
         self.stime = time.strftime(
-            "%Y-%m-%d %H.%M.%S",
+            "%Y-%m-%d %H:%M:%S",
             time.localtime(self.context["time"]),
         )
         self.name = context["sender"].get("card") or context["sender"]["nickname"]
