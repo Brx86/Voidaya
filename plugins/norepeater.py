@@ -14,7 +14,7 @@ from voidaya import Method
 
 
 class Plugin(Method):
-    def match(self):  # 说 hello 则回复
+    def match(self):
         if self.gid in [204097403, 718125729]:
             kv = self.db.get(name := f"repeat:{self.gid}")
             if kv is None or kv[0] != self.raw:
