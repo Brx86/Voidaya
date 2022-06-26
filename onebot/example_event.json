@@ -12,7 +12,7 @@
     "sender": {
         "age": 0,
         "area": "",
-        "card": "",
+        "card": "狐鸦",
         "level": "",
         "nickname": "狐鸦aya~",
         "role": "member",
@@ -24,3 +24,5 @@
     "time": 1653319324,
     "user_id": 1239504152
 }
+
+
