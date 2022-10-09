@@ -63,7 +63,9 @@ class Plugin(Method):
             m = 0
             for k, v in cl:
                 m += 1
-                username = user_dict.get(k) if user_dict.get(k) else k
+                username = user_dict.get(k) or k
+                if len(username) > 15:
+                    username = f"{username[:15]}..."
                 msg = f"{msg}第{m}名: {username}\n       发言{v}条\n"
             return f"{msg}活跃人数: {len(qq_count)}人\n发言总数: {len(qqnum_list)}条\n计算用时: {time.time()-start_time:.3f}s"
         return "未统计本群信息，排行榜为空"

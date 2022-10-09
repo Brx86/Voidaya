@@ -78,17 +78,21 @@ class Method:
         self.db = db
         self.echo = echo
         self.context = context
-        self.raw = context["raw_message"]
-        self.uid = context.get("user_id")
-        self.gid = context.get("group_id")
-        self.mid = context.get("message_id")
-        self.role = context["sender"].get("role")
+        self.raw = context.get("raw_message", "")
+        self.uid = context.get("user_id", 0)
+        self.gid = context.get("group_id", 0)
+        self.mid = context.get("message_id", 0)
+        self.role = context.get("sender", {}).get("role", "")
         self.args = str.split(self.raw)
         self.stime = time.strftime(
             "%Y-%m-%d %H:%M:%S",
             time.localtime(self.context["time"]),
         )
-        self.name = context["sender"].get("card") or context["sender"]["nickname"]
+        self.name = (
+            context.get("sender", {}).get("card")
+            or context.get("sender", {}).get("nickname")
+            or ""
+        )
 
     def limited(self, maxlen: int, limit_time: int) -> bool:
         return self.db.check_limit(f"msg:{self.gid}:{self.uid}", maxlen, limit_time)

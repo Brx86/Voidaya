@@ -6,7 +6,7 @@
 @Version :   1.0
 @Contact :   ayatale@qq.com
 @Github  :   https://github.com/Brx86/Voidaya
-@Desc    :   Hello World
+@Desc    :   本地调用wombo的api，生成关键字的梦境图
 """
 
 from . import logger
@@ -49,7 +49,7 @@ style_text = "风格列表:\n" + "\n".join([f"{k}: {v}" for k, v in style_dict.i
 
 
 class Wombo:
-    # wombo的api，以及丁真裁剪后的背景图base64
+    # wombo的api
     API = "https://app.wombo.art/api"
 
     # 初始化类（因为有异步函数所以不能用__init__）
